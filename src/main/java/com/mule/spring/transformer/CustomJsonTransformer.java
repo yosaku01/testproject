@@ -3,6 +3,9 @@ package com.mule.spring.transformer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.mule.api.MuleMessage;
 import org.mule.api.transformer.TransformerException;
 import org.mule.module.json.transformers.AbstractJsonTransformer;
@@ -18,6 +21,7 @@ public class CustomJsonTransformer extends AbstractJsonTransformer {
 
 	@Autowired
     protected StudentService studentService;
+	private static Logger logger = LogManager.getLogger(CustomJsonTransformer.class);
 	
 	@Override
 	public Object transformMessage(MuleMessage message, String outputEncoding) throws TransformerException {
@@ -25,14 +29,19 @@ public class CustomJsonTransformer extends AbstractJsonTransformer {
 		String transformJsonStr = null;
 		
 		 try {
-	            String jsonMessage = message.getPayloadAsString();	            
+	            String jsonMessage = message.getPayloadAsString();	
 	            //添加信息
 	            JSONObject jsonMap = updateStudentInfos(jsonMessage);
 	            transformJsonStr = jsonMap.toJSONString();
+	            if(!Strings.isBlank(transformJsonStr))
+	            {
+	            	logger.info("The json message after transformation is:" + transformJsonStr);
+	            }
 	        } catch (Exception e) {
 	        		e.printStackTrace();
 	        }		
-        return transformJsonStr;
+		  return null;
+//        return transformJsonStr;
 	}
 	
 	/**

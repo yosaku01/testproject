@@ -10,13 +10,13 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 http://www.mulesoft.org/schema/mule/servlet http://www.mulesoft.org/schema/mule/servlet/current/mule-servlet.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
     <spring:beans>
-    		<spring:import resource="classpath:conf/applicationContext.xml"/>
+    		<spring:import resource="classpath:conf/applicationContext.xml"/>    		
 	</spring:beans>
 			
     <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <flow name="testprojectFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="Test" allowedMethods="POST" doc:name="HTTP"/>
-        <custom-transformer returnClass="java.lang.String" encoding="UTF-8" mimeType="application/json" class="com.mule.spring.transformer.CustomJsonTransformer" doc:name="&#29992;&#20110;&#36716;&#25442;Json&#25253;&#25991;&#35831;&#27714;&#30340;Transformer"/>
+  	    <custom-transformer returnClass="java.lang.String" encoding="UTF-8" mimeType="application/json" class="com.mule.spring.transformer.CustomJsonTransformer" doc:name="&#29992;&#20110;&#36716;&#25442;Json&#25253;&#25991;&#35831;&#27714;&#30340;Transformer"/>
         <dw:transform-message metadata:id="838915ab-810b-4c29-af43-ae0057731e2a" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
@@ -32,7 +32,13 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 		}))
 	}
 }]]></dw:set-payload>
-        </dw:transform-message>  
+        </dw:transform-message>
+        <catch-exception-strategy doc:name="Catch Exception Strategy">
+            <set-payload value="#[org.mule.util.ExceptionUtils.getFullStackTrace(exception)]" encoding="UTF-8" mimeType="text/plain" doc:name="Set Payload"/>
+            <!-- <component class="com.mule.spring.CustomComponent" doc:name="Custom Component"/> -->
+            <custom-processor class="com.mule.spring.messageProcessors.LoggerMessageProcessor" />
+            <set-property propertyName="http.status" value="#[500]" doc:name="Set Http Status" />        
+        </catch-exception-strategy>
     </flow>
 
 </mule>
